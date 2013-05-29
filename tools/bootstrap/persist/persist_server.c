@@ -30,6 +30,7 @@ static void init_params(void)
 {
     HYDT_persist_handle.port = -1;
     HYDT_persist_handle.debug = -1;
+    HYDT_persist_handle.demux = NULL;
 }
 
 static void port_help_fn(void)
@@ -62,9 +63,27 @@ static HYD_status debug_fn(char *arg, char ***argv)
     return HYDU_set_int(arg, &HYDT_persist_handle.debug, 1);
 }
 
+static void demux_help_fn(void)
+{
+    printf("\n");
+    printf("-demux: Demux engine to use\n");
+}
+
+static HYD_status demux_fn(char *arg, char ***argv)
+{
+    HYD_status status = HYD_SUCCESS;
+
+    status = HYDU_set_str(arg, &HYDT_persist_handle.demux, **argv);
+
+    (*argv)++;
+
+    return status;
+}
+
 static struct HYD_arg_match_table match_table[] = {
     {"port", port_fn, port_help_fn},
-    {"debug", debug_fn, debug_help_fn}
+    {"debug", debug_fn, debug_help_fn},
+    {"demux", demux_fn, demux_help_fn}
 };
 
 static HYD_status stdio_cb(int fd, HYD_event_t events, void *userp)
@@ -259,6 +278,13 @@ int main(int argc, char **argv)
     if (HYDT_persist_handle.port == -1 &&
         MPL_env2int("HYDSERV_PORT", &HYDT_persist_handle.port) == 0)
         HYDT_persist_handle.port = PERSIST_DEFAULT_PORT;
+
+    if (HYDT_persist_handle.demux == NULL &&
+        MPL_env2str("HYDSERV_DEMUX", (const char **) &HYDT_persist_handle.demux) == 0)
+        HYDT_persist_handle.demux = NULL;
+
+    status = HYDT_dmx_init(&HYDT_persist_handle.demux);
+    HYDU_ERR_POP(status, "unable to initialize the demux engine\n");
 
     /* wait for connection requests and process them */
     port = (uint16_t) HYDT_persist_handle.port;

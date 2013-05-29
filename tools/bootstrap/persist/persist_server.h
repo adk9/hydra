@@ -14,6 +14,7 @@
 struct HYDT_persist_handle {
     int port;                   /* port to listen on */
     int debug;                  /* Run in debug mode */
+    char *demux;                /* demux engine to use */
 };
 
 extern struct HYDT_persist_handle HYDT_persist_handle;
