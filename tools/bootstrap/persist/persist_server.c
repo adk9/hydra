@@ -100,7 +100,6 @@ static HYD_status stdio_cb(int fd, HYD_event_t events, void *userp)
         status = HYDU_sock_read(private.stdout_fd, buf, HYD_TMPBUF_SIZE, &count,
                                 &closed, HYDU_SOCK_COMM_NONE);
         HYDU_ERR_POP(status, "error reading stdout from upstream\n");
-        HYDU_ASSERT(!closed, status);
 
         hdr.io_type = HYDT_PERSIST_STDOUT;
         hdr.buflen = count;
@@ -125,16 +124,12 @@ static HYD_status stdio_cb(int fd, HYD_event_t events, void *userp)
     }
     else if (fd == private.stderr_fd) {
         /* stderr event */
-        hdr.io_type = HYDT_PERSIST_STDERR;
-        hdr.buflen = 0;
-
         status = HYDU_sock_read(private.stderr_fd, buf, HYD_TMPBUF_SIZE, &count, &closed,
                                 HYDU_SOCK_COMM_NONE);
         HYDU_ERR_POP(status, "error reading stdout from upstream\n");
-        HYDU_ASSERT(!closed, status);
 
-        hdr.io_type = HYDT_PERSIST_STDOUT;
-        hdr.buflen = count;
+        hdr.io_type = HYDT_PERSIST_STDERR;
+        hdr.buflen = 0;
 
         status = HYDU_sock_write(private.client_fd, &hdr, sizeof(hdr), &sent, &closed,
                                  HYDU_SOCK_COMM_MSGWAIT);

@@ -23,7 +23,6 @@ static HYD_status persist_cb(int fd, HYD_event_t events, void *userp)
 
     status = HYDU_sock_read(fd, &hdr, sizeof(hdr), &count, &closed, HYDU_SOCK_COMM_MSGWAIT);
     HYDU_ERR_POP(status, "error reading IO type\n");
-    HYDU_ASSERT(!closed, status);
 
     if (hdr.buflen) {
         status = HYDU_sock_read(fd, buf, hdr.buflen, &count, &closed, HYDU_SOCK_COMM_MSGWAIT);
